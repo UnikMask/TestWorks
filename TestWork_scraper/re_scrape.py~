@@ -1,0 +1,15 @@
+from bs4 import BeautifulSoup
+import urllib3
+
+url_pages = ["https://www.realtor.com/realestateandhomes-search/New-York_NY/"] 
+
+def _init_:
+    for i in range(2, 206):
+        url_pages.append(str("https://www.realtor.com/realestateandhomes-search/New-York_NY/pg-"+str(i)))
+
+
+
+
+def totally_scrape():
+    datana = BeautifulSoup(chosen_url, "lxml")
+    

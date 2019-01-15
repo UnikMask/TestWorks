@@ -1,0 +1,8 @@
+﻿  CmdCall.cpp
+  Learning.cpp
+c:\users\alexa\gitrepos\testwork\testworkconsole\learning.cpp(119): warning C4244: 'argument': conversion from 'arma::uword' to 'int', possible loss of data
+c:\users\alexa\gitrepos\testwork\testworkconsole\learning.cpp(120): warning C4244: 'argument': conversion from 'arma::uword' to 'int', possible loss of data
+c:\users\alexa\gitrepos\testwork\testworkconsole\learning.cpp(148): warning C4244: 'argument': conversion from 'arma::uword' to 'int', possible loss of data
+  TestWorkConsole.cpp
+  Generating Code...
+  TestWorkConsole.vcxproj -> C:\Users\alexa\gitrepos\testwork\TestWorkConsole\x64\Release\TestWorkConsole.exe
