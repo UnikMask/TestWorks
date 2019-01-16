@@ -47,6 +47,7 @@ def totally_scrape(chosen_url):
     
     while Check_block(datana):
         input('System blocked you down. Change IP then press Enter to continue...')
+        datana = BeautifulSoup(urllib3.PoolManager().request('GET',chosen_url).data, "lxml")
 
     reidcard = datana.select('div.detail-wrap')
     
