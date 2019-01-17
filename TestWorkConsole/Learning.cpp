@@ -62,14 +62,43 @@ void Learn::grdesc() //The Gradient descent algorithm.
 	return;
 }
 
+
+void Learn::feature_scale()
+{
+	frowvec maxes = zeros<frowvec>(x.n_cols);
+	for (size_t i = 0; i < x.n_cols - 1; i++)
+	{
+		maxes(i) = x.col(i).max();
+	}
+	for (size_t i = 0; i < x.n_cols - 1; i++)
+	{
+		x.col(i) = x.col(i) / maxes(i);
+	}
+	y / y.max();
+}
+
+
 void Learn::hypoth() //The hypothesis function to predict the cost of real estate.
 {
-	Col<float> xs(4), xsq(4);
-	xs(0) = cint<float>("Constructed surface: ");
-	xs(1) = 10 * cint<float>("Floors: ");
+	Col<float> xs(x.n_cols, fill::zeros), xsq(x.n_cols, fill::zeros);
+	/*xs(0) = cint<float>("Constructed surface: ");
+	xs(1) = 10 * cint<float>("Bathrooms: ");
 	xs(2) = 10 * cint<float>("Bedrooms: ");
-	xs(3) = 10 * cint<float>("Floor concerned (if it is an appartment, = to the first floor concerned, else = 0.) : ");
-	xsq = square_adapt(square_coeff, xs, xsq);
+	xs(3) = 10 * cint<float>("Floor concerned (if it is an appartment, = to the first floor concerned, else = 0.) : ");*/
+	for (size_t i = 0; i < x.n_cols - 1; i++)
+	{
+		std::string typ_string = "Choose Element ";
+		stringstream convert;
+		convert << (i+1);
+		typ_string.append(convert.str());
+		typ_string.append(":");
+		xs(i) = cint<float>(typ_string);
+	}
+	for (size_t i = 0; i < x.n_cols - 1; i++)
+	{
+		xs(i) /= x.col(i).max();
+	}
+	//xsq = square_adapt(square_coeff, xs, xsq); Later...
 	float rslt = sum(xsq.t() * theta); //The predicted price.
 	cout << "The price of the real estate concerned should be: " << rslt;
 	return;
@@ -111,7 +140,9 @@ void Learn::dataload(const string filedir) //Load the datadex matrix, and initia
 	theta.set_size(datadex.n_cols-1);
 	theta.randn();
 	square_coeff = 0;
-	cout << "Data, examples, and parameters are initialized for " << filedir << ". " << flush;
+	cout << "Applying feature scaling...";
+	this->feature_scale();
+	cout << "\r" << "Data, examples, and parameters are initialized for " << filedir << ". " << flush;
 }
 
 void Learn::square_lr() //Function to build a square function to fit the samples.
@@ -157,6 +188,9 @@ Col<float> Learn::square_adapt(int sqcoff, Col<float> xnsq, Col<float> xofuse)
 	}
 	return xofuse;
 }
+
+
+
 
 std::string Learn::renakb(int ls, std::string kb,char exclch)//Approximate duplicate of the cmdkb in CmdCall.
 {

@@ -14,7 +14,7 @@ using namespace arma;
 class Learn
 {
 public:
-	void dataload(const std::string filedir = "re-central_london.txt"), grdesc(void), hypoth(void), square_lr(void);
+	void dataload(const std::string filedir = "re-central_london.txt"), grdesc(void), hypoth(void), square_lr(void), feature_scale(void);
 	Col<float> square_adapt(int sqcoff, Col<float> xnsq, Col<float> xofuse);
 	float costf(void);
 	std::string renakb(int ls, std::string kb, char exclch = ' ');
