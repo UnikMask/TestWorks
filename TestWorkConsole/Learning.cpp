@@ -16,12 +16,12 @@ long Learn::factorial(int n) //function to calculate factorials - hope it works
 	return returnval;
 }
 
-long Learn::pascaltri(int param_n, int value_k) //Based on the Pascale triangle - use for later
+inline long Learn::pascaltri(int param_n, int value_k) //Based on the Pascale triangle - use for later
 {
 	return factorial(param_n) / (factorial(value_k)*factorial(1 - value_k));
 }
 
-float Learn::costf() //Cost function algorithm
+inline float Learn::costf() //Cost function algorithm
 {
 	uword m = y.n_rows;
 	float cost = sum(((x * theta) - y) % ((x * theta) - y)) / (2*m);
@@ -30,24 +30,19 @@ float Learn::costf() //Cost function algorithm
 
 void Learn::grdesc() //The Gradient descent algorithm.
 { 
-	cout << "Repetitions : ";
-	string numrps, lrncfs;
-	getline(cin, numrps);
 	int nmrp, i;
 	float lrncf;
+	nmrp = cint<int>("Repetitions : ");
 	cout << "\n";
-	stringstream(numrps) >> nmrp;
-	cout << "Learning Coefficient : ";
-	getline(cin, lrncfs);
+	lrncf = cint<float>("Learning Coefficient : ");
 	cout << "\n";
-	stringstream(lrncfs) >> lrncf;
 	Col<float> theta_t;
-	lrncf = lrncf / 10;
+
 	theta_t = theta;
 	theta -= lrncf * (1 / float(y.n_rows)) * x.t() * (x * theta - y);
-	for (i = 0; i < float(theta.n_elem); i++ ) 
+	for (i = 0; i < theta.n_elem; i++ ) 
 	{
-		while (abs(theta_t(i)) <= abs(theta(i)))
+		while (abs(theta_t(i)) < abs(theta(i)))
 		{
 			lrncf = lrncf / 10;
 			theta_t = theta;
@@ -66,15 +61,15 @@ void Learn::grdesc() //The Gradient descent algorithm.
 void Learn::feature_scale()
 {
 	frowvec maxes = zeros<frowvec>(x.n_cols);
-	for (size_t i = 0; i < x.n_cols - 1; i++)
+	for (size_t i = 0; i < x.n_cols ; i++)
 	{
 		maxes(i) = x.col(i).max();
 	}
-	for (size_t i = 0; i < x.n_cols - 1; i++)
+	for (size_t i = 0; i < x.n_cols ; i++)
 	{
 		x.col(i) = x.col(i) / maxes(i);
 	}
-	y / y.max();
+	y /= y.max();
 }
 
 
@@ -85,7 +80,7 @@ void Learn::hypoth() //The hypothesis function to predict the cost of real estat
 	xs(1) = 10 * cint<float>("Bathrooms: ");
 	xs(2) = 10 * cint<float>("Bedrooms: ");
 	xs(3) = 10 * cint<float>("Floor concerned (if it is an appartment, = to the first floor concerned, else = 0.) : ");*/
-	for (size_t i = 0; i < x.n_cols - 1; i++)
+	for (size_t i = 0; i < x.n_cols; i++)
 	{
 		std::string typ_string = "Choose Element ";
 		stringstream convert;
@@ -94,12 +89,13 @@ void Learn::hypoth() //The hypothesis function to predict the cost of real estat
 		typ_string.append(":");
 		xs(i) = cint<float>(typ_string);
 	}
-	for (size_t i = 0; i < x.n_cols - 1; i++)
+	for (size_t i = 0; i < x.n_cols; i++)
 	{
 		xs(i) /= x.col(i).max();
 	}
+	xsq = xs;
 	//xsq = square_adapt(square_coeff, xs, xsq); Later...
-	float rslt = sum(xsq.t() * theta); //The predicted price.
+	float rslt = sum(xsq.t() * theta) * datadex.col(0).max(); //The predicted price.
 	cout << "The price of the real estate concerned should be: " << rslt;
 	return;
 }

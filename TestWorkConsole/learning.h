@@ -27,9 +27,9 @@ private:
 	int square_coeff; // The number of square processes
 };
 
-template <class tpe>
+template <class tpe> //Quick convertion from string to any standard type.
 
-static tpe cint(std::string coutstr)
+inline static tpe cint(std::string coutstr)
 {
 	std::string varstr;
 	cout << coutstr;
