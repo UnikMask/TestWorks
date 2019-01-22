@@ -15,15 +15,15 @@ class Learn
 {
 public:
 	void dataload(const std::string filedir = "re-central_london.txt"), grdesc(void), hypoth(void), square_lr(void), feature_scale(void);
-	Col<float> square_adapt(int sqcoff, Col<float> xnsq, Col<float> xofuse);
-	float costf(void);
+	Col<double> square_adapt(int sqcoff, Col<double> xnsq);
+	double costf(void);
 	std::string renakb(int ls, std::string kb, char exclch = ' ');
 	int kbimp(int ls, std::string kb, char exclch);
-	long factorial(int n), pascaltri(int param_n, int value_k);
+	long long factorial(int n), pascaltri(int param_n, int value_k);
 
 private:
-	Mat<float> x, datadex; // The data  and example matrices.
-	Col<float> y, theta; // The example results and the parameter vectors.
+	Mat<double> x, datadex; // The data  and example matrices.
+	Col<double> y, theta; // The example results and the parameter vectors.
 	int square_coeff; // The number of square processes
 };
 

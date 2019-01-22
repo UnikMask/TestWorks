@@ -6,7 +6,7 @@
 using namespace std;
 using namespace arma;
 
-long Learn::factorial(int n) //function to calculate factorials - hope it works
+long long Learn::factorial(int n) //function to calculate factorials - hope it works
 {
 	long returnval = 1;
 	for(int i = 1; i<=n; i++)
@@ -16,42 +16,42 @@ long Learn::factorial(int n) //function to calculate factorials - hope it works
 	return returnval;
 }
 
-inline long Learn::pascaltri(int param_n, int value_k) //Based on the Pascale triangle - use for later
+inline long long Learn::pascaltri(int param_n, int value_k) //Based on the Pascale triangle - use for later
 {
-	return factorial(param_n) / (factorial(value_k)*factorial(1 - value_k));
+	return factorial(param_n) / (factorial(value_k)*factorial(param_n - value_k));
 }
 
-inline float Learn::costf() //Cost function algorithm
+inline double Learn::costf() //Cost function algorithm
 {
 	uword m = y.n_rows;
-	float cost = sum(((x * theta) - y) % ((x * theta) - y)) / (2*m);
+	double cost = sum(((x * theta) - y) % ((x * theta) - y)) / (2*m);
 	return cost;
 }
 
 void Learn::grdesc() //The Gradient descent algorithm.
 { 
 	int nmrp, i;
-	float lrncf;
+	double lrncf;
 	nmrp = cint<int>("Repetitions : ");
 	cout << "\n";
-	lrncf = cint<float>("Learning Coefficient : ");
+	lrncf = cint<double>("Learning Coefficient : ");
 	cout << "\n";
-	Col<float> theta_t;
+	Col<double> theta_t;
 
 	theta_t = theta;
-	theta -= lrncf * (1 / float(y.n_rows)) * x.t() * (x * theta - y);
+	theta -= lrncf * (1 / double(y.n_rows)) * x.t() * (x * theta - y);
 	for (i = 0; i < theta.n_elem; i++ ) 
 	{
 		while (abs(theta_t(i)) < abs(theta(i)))
 		{
 			lrncf = lrncf / 10;
 			theta_t = theta;
-			theta -= lrncf * (1 / float(y.n_rows)) * x.t() * (x * theta - y);
+			theta -= lrncf * (1 / double(y.n_rows)) * x.t() * (x * theta - y);
 		}
 	}
 	for (i = 0; i < nmrp; i++)
 	{
-		theta -= lrncf * (1 / float(y.n_rows) ) * x.t() * (x * theta - y);
+		theta -= lrncf * (1 / double(y.n_rows) ) * x.t() * (x * theta - y);
 	}
 	cout << " new optimized parameters : " << "\n" << theta << "\n New cost: " << costf() << "\n Adapted Learning Coefficient: " << lrncf;
 	return;
@@ -60,7 +60,7 @@ void Learn::grdesc() //The Gradient descent algorithm.
 
 void Learn::feature_scale()
 {
-	frowvec maxes = zeros<frowvec>(x.n_cols);
+	rowvec maxes = zeros<rowvec>(x.n_cols);
 	for (size_t i = 0; i < x.n_cols ; i++)
 	{
 		maxes(i) = x.col(i).max();
@@ -75,27 +75,27 @@ void Learn::feature_scale()
 
 void Learn::hypoth() //The hypothesis function to predict the cost of real estate.
 {
-	Col<float> xs(x.n_cols, fill::zeros), xsq(x.n_cols, fill::zeros);
-	/*xs(0) = cint<float>("Constructed surface: ");
-	xs(1) = 10 * cint<float>("Bathrooms: ");
-	xs(2) = 10 * cint<float>("Bedrooms: ");
-	xs(3) = 10 * cint<float>("Floor concerned (if it is an appartment, = to the first floor concerned, else = 0.) : ");*/
-	for (size_t i = 0; i < x.n_cols; i++)
+	Col<double> xs(datadex.n_cols, fill::zeros);
+	/*xs(0) = cint<double>("Constructed surface: ");
+	xs(1) = 10 * cint<double>("Bathrooms: ");
+	xs(2) = 10 * cint<double>("Bedrooms: ");
+	xs(3) = 10 * cint<double>("Floor concerned (if it is an appartment, = to the first floor concerned, else = 0.) : ");*/
+	xs(0) = 1;
+	for (size_t i = 0; i < datadex.n_cols - 1; i++)
 	{
 		std::string typ_string = "Choose Element ";
 		stringstream convert;
 		convert << (i+1);
 		typ_string.append(convert.str());
 		typ_string.append(":");
-		xs(i) = cint<float>(typ_string);
+		xs(i+1) = cint<double>(typ_string);
 	}
-	for (size_t i = 0; i < x.n_cols; i++)
+	for (size_t i = 0; i < datadex.n_cols-1; i++)
 	{
-		xs(i) /= x.col(i).max();
+		xs(i+1) /= datadex.col(i+1).max();
 	}
-	xsq = xs;
-	//xsq = square_adapt(square_coeff, xs, xsq); Later...
-	float rslt = sum(xsq.t() * theta) * datadex.col(0).max(); //The predicted price.
+	xs = square_adapt(square_coeff, xs); //Later...
+	double rslt = sum(xs.t() * theta) * datadex.col(0).max(); //The predicted price.
 	cout << "The price of the real estate concerned should be: " << rslt;
 	return;
 }
@@ -119,7 +119,7 @@ void Learn::dataload(const string filedir) //Load the datadex matrix, and initia
 		int i = 0;
 		for (int j = 0; renakb(i, lnar,',') != "" && renakb(i, lnar, '#') != ""; j++)
 		{
-			float exex = 0;
+			double exex = 0;
 			stringstream(renakb(i, lnar, ',')) >> exex;
 			datadex(k, j) = exex;
 			i = kbimp(i, lnar, ',');
@@ -129,11 +129,12 @@ void Learn::dataload(const string filedir) //Load the datadex matrix, and initia
 	datafle.close();
 
 	//Initialize and set up x, y, and theta.
-	x.set_size(datadex.n_rows, datadex.n_cols - 1);
+	x.set_size(datadex.n_rows, datadex.n_cols);
 	y.set_size(datadex.n_rows);
-	x = datadex(span(0, datadex.n_rows - 1) , span(1, datadex.n_cols - 1));
-	y = vectorise(datadex(span(0, datadex.n_rows-1), 0));
-	theta.set_size(datadex.n_cols-1);
+	x(span(0, datadex.n_rows - 1), span(1, datadex.n_cols - 1)) = datadex(span(0, datadex.n_rows - 1) , span(1, datadex.n_cols - 1));
+	x.col(0).fill(1);
+	y = vectorise(datadex.col(0));
+	theta.set_size(x.n_cols);
 	theta.randn();
 	square_coeff = 0;
 	cout << "Applying feature scaling...";
@@ -143,46 +144,55 @@ void Learn::dataload(const string filedir) //Load the datadex matrix, and initia
 
 void Learn::square_lr() //Function to build a square function to fit the samples.
 {
-	x.set_size(theta.n_rows - pascaltri(theta.size() + 1, 3), x.n_cols-1);
-	y.set_size(theta.n_rows - pascaltri(theta.size() + 1, 3));
-	theta.set_size(theta.n_rows - (theta.size() + 1, 3));
+	Mat<double>* temp_x = new Mat<double>;
+	*temp_x = x;
+	x.set_size(x.n_rows, theta.n_elem*theta.n_elem - pascaltri(theta.n_elem, 2));
+	theta.set_size(theta.n_rows*theta.n_rows - pascaltri(theta.n_elem, 2));
 
 	// Those for loops develop the square of the original function. for 1 parameter, (x0 + x1)^2 = x0^2 + x1^2 + 2x1x0.
 	//
-	for (size_t i = 0; i< datadex.n_rows-1; i++)
+	x(span(0, temp_x->n_rows - 1), span(0, temp_x->n_cols - 1)) = *temp_x % *temp_x;
+	size_t extr = 0;
+	for (size_t i = 0; i< x.n_cols - 1; i++)
 	{
-		x(span(0, x.n_cols - 1), i) = datadex(span(1 ,x.n_cols), i) % datadex(span(1, x.n_cols), i);
-		y(i) = datadex(0, i) * datadex(0, i);
-
-		for (size_t k = i + 1; k < datadex.n_rows - 2; k++)
+		for (size_t k = i; k < temp_x->n_cols - 1; k++)
 		{
-			x.col(datadex.n_cols - 2 + k) = 2 * datadex(span(1, x.n_cols), i) % datadex(span(1, x.n_cols), k);
-			y(datadex.n_cols - 2 + k) = datadex(0, i) * datadex(0, k);
+			x.col(temp_x->n_cols + extr) = 2 * (temp_x->col(i) % temp_x->col(k+1));
+			extr++;
 		}
 	}
 
 	//Assign random numbers to the weights.
+	delete temp_x;
 	theta.randn();
 	square_coeff++;
 }
 
-Col<float> Learn::square_adapt(int sqcoff, Col<float> xnsq, Col<float> xofuse)
+Col<double> Learn::square_adapt(int sqcoff, Col<double> xnsq) //This function adapts the user's input to the degree of the matrice's polynomial
 {
-	xofuse = xnsq;
+	Col<double>* xrefsq = new Col<double>;
 	for (size_t i = 0; i < sqcoff; i++)
 	{
-		xnsq = xofuse;
-		xofuse.set_size(xnsq.n_cols - 1 - pascaltri(xnsq.n_cols - 1, 3));
-		for (size_t k = 0; k < xnsq.n_cols - 1; k++)
+		*xrefsq = xnsq;
+		xnsq.set_size(xrefsq->n_rows * xrefsq->n_rows - pascaltri(xrefsq->n_rows, 2));
+
+		// Those for loops develop the square of the original function. for 1 parameter, (x0 + x1)^2 = x0^2 + x1^2 + 2x1x0.
+		//
+		xnsq(span(0, xrefsq->n_rows - 1)) = *xrefsq % *xrefsq;
+		size_t extr = 0;
+		for (size_t k = 0; k < xnsq.n_rows - 1; k++)
 		{
-			xofuse(k) = xnsq(k) * xnsq(k);
-			for (size_t l = k + 1; l < xnsq.n_cols - 2; l++)
+			for (size_t l = k; l < xrefsq->n_rows - 1; l++)
 			{
-				xofuse(xnsq.n_cols - 1 + l) = xnsq(k) * xnsq(l);
+				xnsq.row(xrefsq->n_rows + extr) = 2 * (xrefsq->row(k) % xrefsq->row(l + 1));
+				extr++;
 			}
 		}
+
+		//Assign random numbers to the weights.
 	}
-	return xofuse;
+	delete xrefsq;
+	return xnsq;
 }
 
 
