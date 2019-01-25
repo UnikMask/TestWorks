@@ -45,7 +45,7 @@ void Learn::grdesc() //The Gradient descent algorithm.
 		while (abs(theta_t(i)) < abs(theta(i)))
 		{
 			lrncf = lrncf / 10;
-			theta_t = theta;
+			theta = theta_t;
 			theta -= lrncf * (1 / double(y.n_rows)) * x.t() * (x * theta - y);
 		}
 	}
@@ -142,6 +142,47 @@ void Learn::dataload(const string filedir) //Load the datadex matrix, and initia
 	cout << "\r" << "Data, examples, and parameters are initialized for " << filedir << ". " << flush;
 }
 
+void Learn::check_oos(string filedir)
+{
+	ifstream datafle;
+	string lnar;
+	int matx, maty, k = 0;
+	datafle.open(filedir);
+	getline(datafle, lnar);
+
+	//Initialization of the data matrix.
+	stringstream(renakb(0, lnar, ':')) >> maty;
+	stringstream(renakb(kbimp(0, lnar, ':'), lnar)) >> matx;
+	Mat<double> hypoth_dat(matx, maty);
+	while (getline(datafle, lnar))
+	{
+		int i = 0;
+		for (int j = 0; renakb(i, lnar, ',') != "" && renakb(i, lnar, '#') != ""; j++)
+		{
+			double exex = 0;
+			stringstream(renakb(i, lnar, ',')) >> exex;
+			hypoth_dat(k, j) = exex;
+			i = kbimp(i, lnar, ',');
+		}
+		k++;
+	}
+	datafle.close();
+	for (size_t i = 0; i < hypoth_dat.n_cols; i++)
+	{
+		double max = hypoth_dat.col(i).max();
+		hypoth_dat.col(i) = hypoth_dat.col(i) / max;
+	}
+	Mat<double> vec_params(hypoth_dat.n_rows, hypoth_dat.n_cols);
+	vec_params.col(0).fill(1);
+	vec_params(span(0, hypoth_dat.n_rows - 1),span(1, hypoth_dat.n_cols - 1)) = hypoth_dat(span(0, hypoth_dat.n_rows - 1), span(1, hypoth_dat.n_cols - 1));
+	vec_params = square_adapt(square_coeff, vec_params);
+
+	Col<double> vec_rslts = vec_params * theta * datadex.col(0).max();
+	cout << vec_rslts;
+	vec_rslts = vec_rslts / (vec_rslts % vec_rslts);
+	cout << "The average precision of the data is of " << (sum(vec_rslts %  hypoth_dat.col(0)) / hypoth_dat.col(0).n_rows ) * 100 << "%.";
+}
+
 void Learn::square_lr() //Function to build a square function to fit the samples.
 {
 	Mat<double>* temp_x = new Mat<double>;
@@ -195,7 +236,32 @@ Col<double> Learn::square_adapt(int sqcoff, Col<double> xnsq) //This function ad
 	return xnsq;
 }
 
+Mat<double> Learn::square_adapt(int sqcoff, Mat<double> xnsq) 
+{
+	Mat<double>* xrefsq = new Mat<double>;
+	for (size_t i = 0; i < sqcoff; i++)
+	{
+		*xrefsq = xnsq;
+		xnsq.set_size(xnsq.n_rows, xrefsq->n_cols * xrefsq->n_cols - pascaltri(xrefsq->n_cols, 2));
 
+		// Those for loops develop the square of the original function. for 1 parameter, (x0 + x1)^2 = x0^2 + x1^2 + 2x1x0.
+		//
+		xnsq(span(0, xrefsq->n_rows - 1),span(0, xrefsq->n_cols - 1)) = *xrefsq % *xrefsq;
+		size_t extr = 0;
+		for (size_t k = 0; k < xnsq.n_rows - 1; k++)
+		{
+			for (size_t l = k; l < xrefsq->n_rows - 1; l++)
+			{
+				xnsq.col(xrefsq->n_cols + extr) = 2 * (xrefsq->col(k) % xrefsq->col(l + 1));
+				extr++;
+			}
+		}
+
+		//Assign random numbers to the weights.
+	}
+	delete xrefsq;
+	return xnsq;
+}
 
 
 std::string Learn::renakb(int ls, std::string kb,char exclch)//Approximate duplicate of the cmdkb in CmdCall.

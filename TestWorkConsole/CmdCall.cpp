@@ -78,6 +78,18 @@ void Command::call_rena(int li) //Function for commands related to the R.E.N.A. 
 	{
 		renatools.square_lr();
 	}
+	else if (kbcmd(li) == "checkoos")
+	{
+		if (kbcmd(li+5) == "")
+		{
+			cout << "Please add an argument (Argument = file dir). ";
+		}
+		else
+		{
+			renatools.check_oos(kbcmd(li + 9));
+		}
+		
+	}
 	else
 	{
 		cout << "Wrong keyword or typos present. Please enter a valid command. ";
